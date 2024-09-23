@@ -1,56 +1,99 @@
 
+import flatpickr from "flatpickr";
 import iziToast from "izitoast";
-
+import "flatpickr/dist/flatpickr.min.css";
 import "izitoast/dist/css/iziToast.min.css";
 
+const startBtn = document.querySelector('[data-start]');
+const daysDisplay = document.querySelector('[data-days]');
+const hoursDisplay = document.querySelector('[data-hours]');
+const minutesDisplay = document.querySelector('[data-minutes]');
+const secondsDisplay = document.querySelector('[data-seconds]');
+const dateTimepicker = document.querySelector("#datetime-picker");
 
+let userSelectedDate = null;
 
-const fulfilledBtn = document.querySelector('input[value="fulfilled"]');
-const rejectedBtn = document.querySelector('input[value="rejected"]');
-const createBtn = document.querySelector(".btn");
-const form = document.querySelector(".form");
+const options = {
+  enableTime: true,
+  time_24hr: true,
+  defaultDate: new Date(),
+  minuteIncrement: 1,
+  onClose(selectedDates) {
+    userSelectedDate = selectedDates[0];
+    validateDate();
+  },
+};
 
-function handleSubmit(event) {
-  event.preventDefault();
-  event.target;
+flatpickr("#datetime-picker", options);
 
-  const formData = new FormData(form);
-  const delay = formData.get("delay"); 
-  const state = formData.get("state");
-
-  const promise = new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (state === "fulfilled") {
-        resolve(`✅ Fulfilled promise in ${delay}ms`);
-      } else {
-        reject(`❌ Rejected promise in ${delay}ms`);
-      }
-    }, delay);
-  });
-
-  promise
-  .then(message => {
+function validateDate() {
+  if (userSelectedDate < Date.now()) {
     iziToast.show({
-        class: "wave-stroke",  
-        title: "OK",
-        message: message,
-        position: "topRight",
-        closeOnEscape: true,
-        closeOnClick: true,
-        backgroundColor: "#59a10d",
+      title: "Hey dear",
+      message: "Please choose a date in the future",
+      position: "topCenter",
+      closeOnEscape: true,
+      closeOnClick: true,
     });
-  })
-  .catch(error => {
-    iziToast.show({
-        class: "wave-stroke",   
-        title: "Error!",
-        message: error,
-        position: "topRight",
-        closeOnEscape: true,
-        closeOnClick: true,
-        backgroundColor: "#ef4040",
-    });
-  });
+    startBtn.disabled = true;
+  } else {
+    startBtn.disabled = false;
+  }
 }
 
-form.addEventListener("submit", handleSubmit);
+function convertMs(ms) {
+  const second = 1000;
+  const minute = second * 60;
+  const hour = minute * 60;
+  const day = hour * 24;
+
+  const days = Math.floor(ms / day);
+  const hours = Math.floor((ms % day) / hour);
+  const minutes = Math.floor(((ms % day) % hour) / minute);
+  const seconds = Math.floor((((ms % day) % hour) % minute) / second);
+
+  return { days, hours, minutes, seconds };
+}
+
+function addLeadingZero(value) {
+  return String(value).padStart(2, '0');
+}
+
+function updateTimerFace({ days, hours, minutes, seconds }) {
+  daysDisplay.textContent = addLeadingZero(days);
+  hoursDisplay.textContent = addLeadingZero(hours);
+  minutesDisplay.textContent = addLeadingZero(minutes);
+  secondsDisplay.textContent = addLeadingZero(seconds);
+}
+
+let countInterval = null;
+
+function startCount() {
+  countInterval = setInterval(() => {
+    const timeRemain = userSelectedDate - Date.now();
+
+    if (timeRemain <= 0) {
+      clearInterval(countInterval);
+      updateTimerFace({ days: "00", hours: "00", minutes: "00", seconds: "00" });
+      startBtn.disabled = true;
+      dateTimepicker.disabled = false;
+      return;
+    }
+
+    const time = convertMs(timeRemain);
+    updateTimerFace(time);
+  }, 1000);
+}
+
+startBtn.addEventListener("click", () => {
+  if (!userSelectedDate) return;
+
+  if (countInterval) {
+    clearInterval(countInterval);
+  }
+
+  dateTimepicker.disabled = true;
+  startBtn.disabled = true;
+
+  startCount();
+});
