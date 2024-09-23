@@ -3,16 +3,37 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Timer</title>
-    <link rel="stylesheet" href="./css/styles.css">
+    <title>Countdown Timer</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css" />
+    <style>
+        .timer {
+            display: flex;
+            gap: 20px;
+        }
+
+        .field {
+            text-align: center;
+        }
+
+        .value {
+            font-size: 3rem;
+        }
+
+        .label {
+            font-size: 1rem;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 
 <body>
-
-    <input type="text" id="datetime-picker" class="input-field" />
-    <button type="button" class="start-btn" data-start disabled>Start</button>
+    <input type="text" id="datetime-picker" />
+    <button type="button" data-start disabled>Start</button>
 
     <div class="timer">
         <div class="field">
@@ -33,12 +54,9 @@
         </div>
     </div>
 
-    <p>
-        <a href="./index.html"></a>
-    </p>
-
-    <script type="module" src="./js/1-timer.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
+    <script type="module" src="./1-timer.js"></script>
 </body>
 
 </html>
